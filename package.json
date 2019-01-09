@@ -1,0 +1,23 @@
+{
+  "name": "face-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "start": "parcel serve index.html",
+    "static": "serve"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^10.12.18",
+    "face-api.js": "^0.17.1"
+  },
+  "devDependencies": {
+    "parcel": "^1.11.0",
+    "serve": "^10.1.1",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.2.2"
+  }
+}

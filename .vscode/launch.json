@@ -11,13 +11,6 @@
             "program": "${workspaceFolder}/app.js"
         },
         {
-            "type": "node",
-            "request": "launch",
-            "name": "ts-node",
-            "cwd": "${workspaceFolder}",
-            "args": ["-r", "ts-node", "app.ts"]
-        },
-        {
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",

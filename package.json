@@ -11,7 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tensorflow/tfjs-node": "^0.2.1",
     "@types/node": "^10.12.18",
+    "canvas": "^2.2.0",
     "face-api.js": "^0.17.1"
   },
   "devDependencies": {

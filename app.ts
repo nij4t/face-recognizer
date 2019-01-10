@@ -2,6 +2,7 @@ import * as faceapi from "face-api.js";
 import { Canvas, Image, ImageData } from "canvas";
 import { readdirSync, writeFileSync, readFileSync } from "fs";
 
+require('@tensorflow/tfjs-node')
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 
 const MODEL_URI = "./static/models/";
@@ -59,37 +60,49 @@ function _serialize(
   path: string,
   labeledDescriptors: faceapi.LabeledFaceDescriptors[]
 ) {
-  writeFileSync(path, JSON.stringify(labeledDescriptors));
+  const serializable = labeledDescriptors.map(descriptor => ({
+    _label: descriptor.label,
+    _descriptors: Object.values(descriptor.descriptors).map(val =>
+      Object.values(val)
+    )
+  }));
+  writeFileSync(path, JSON.stringify(serializable));
 }
 
-function _load(path: string): faceapi.LabeledFaceDescriptors[] {
-    // FIXME: Descriptors: Float32Array
-  return JSON.parse(readFileSync(path).toString());
+function _deserialize(path: string): faceapi.LabeledFaceDescriptors[] {
+  return JSON.parse(readFileSync(path).toString()).map(
+    fr =>
+      new faceapi.LabeledFaceDescriptors(
+        fr._label,
+        Object.values(fr._descriptors).map(
+          val => new Float32Array(Object.values(val))
+        )
+      )
+  );
 }
 
 (async () => {
   await _loadModelsAsync();
   const labels = readdirSync(TRAINING_URI);
-  //   const labeledSetOfDescriptors = await _getAllLabeledDescriptors(
-  //     labels,
-  //     TRAINING_URI
-  //   );
+  // const labeledSetOfDescriptors = await _getAllLabeledDescriptors(
+  //   labels,
+  //   TRAINING_URI
+  // );
 
-  //   _serialize(
-  //     "./static/data/trained/" + labels.join("_") + ".json",
-  //     labeledSetOfDescriptors
-  //   );
+  // _serialize(
+  //   "./static/data/trained/" + labels.join("_") + ".json",
+  //   labeledSetOfDescriptors
+  // );
 
-  const trained: faceapi.LabeledFaceDescriptors[] = _load(
+  const trained: faceapi.LabeledFaceDescriptors[] = _deserialize(
     "./static/data/trained/Dwayne Johnson_Edward Norton.json"
   );
 
-  const descriptorToMatch = await _getFaceDescriptorsAsync(_createImage(TRAINING_URI+labels[0]+"/dwayne johnson 1.jpg"));
-  const faceMatcher = new faceapi.FaceMatcher(
-    trained,
-    .6
+  const descriptorToMatch = await _getFaceDescriptorsAsync(
+    _createImage(FILE_PATH)
   );
+  const faceMatcher = new faceapi.FaceMatcher(trained, 0.6);
   const result = await faceMatcher.findBestMatch(descriptorToMatch);
 
-  console.log(result)
+  console.log(result);
 })();

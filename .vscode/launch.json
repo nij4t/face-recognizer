@@ -18,6 +18,16 @@
             "runtimeExecutable": "/usr/bin/chromium",
             "runtimeArgs": ["--new-window", "--remote-debugging-port=9222"],
             "webRoot": "${workspaceFolder}/dist"
+        },
+        {
+            "name": "Current TS File",
+            "type": "node",
+            "request": "launch",
+            "args": ["${relativeFile}"],
+            "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+            "sourceMaps": true,
+            "cwd": "${workspaceRoot}",
+            "protocol": "inspector",
         }
     ]
 }

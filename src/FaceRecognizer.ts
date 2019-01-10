@@ -12,8 +12,8 @@ export default class FaceRecognizer {
   private MODEL_URI = "./models/";
   private DISTANCE_THRESHOLD = 0.6;
 
-  public onnetworkready: Function;
-  public onnetworktrained: Function;
+  public onnetworkready: Function = () => {};
+  public onnetworktrained: Function = () => {};
 
   private constructor() {
     Promise.all([

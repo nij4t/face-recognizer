@@ -9,14 +9,14 @@ const MODEL_URI = "./models/";
 
 export default class FaceRecognizer {
   private static instance: FaceRecognizer;
-  private cb: Function;
+  public onmodelsready: Function;
 
   private constructor() {
     Promise.all([
       faceapi.nets.ssdMobilenetv1.loadFromDisk(MODEL_URI),
       faceapi.nets.faceLandmark68Net.loadFromDisk(MODEL_URI),
       faceapi.nets.faceRecognitionNet.loadFromDisk(MODEL_URI)
-    ]).then(() => this.cb())
+    ]).then(() => this.onmodelsready())
   }
 
   static getInstance() {
@@ -24,9 +24,5 @@ export default class FaceRecognizer {
       this.instance = new FaceRecognizer();
     }
     return this.instance;
-  }
-
-  onModelsReady(cb) {
-    this.cb = cb;
   }
 }

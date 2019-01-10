@@ -11,7 +11,7 @@ suite("FaceRecognizer Test Suite", () => {
   });
 
   test("Load models successful", done => {
-    fr.onModelsReady(() => done())
+    fr.onmodelsready = () => done()
   });
 
 });

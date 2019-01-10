@@ -42,7 +42,7 @@ var FaceRecognizer_1 = require("./FaceRecognizer");
 var fs_1 = require("fs");
 var fr = FaceRecognizer_1.default.getInstance();
 program
-    .version(JSON.parse(fs_1.readFileSync("./package.json").toString()).version)
+    .version('1.0.0')
     .command("train <classDirPath> <serializedBiasesPath>")
     .description("Train network")
     .action(function (classDirPath, serializedBiasesPath) { return __awaiter(_this, void 0, void 0, function () {

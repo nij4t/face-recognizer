@@ -5,7 +5,11 @@
   "main": "index.ts",
   "scripts": {
     "build": "tsc",
-    "test": "mocha --ui tdd --require ts-node/register tests/**/*.ts"
+    "test": "mocha --ui tdd --require ts-node/register tests/**/*.ts",
+    "prettier:base": "prettier --parser typescript",
+    "prettier:check": "npm run prettier:base --list-different \"src/**/*{ts,tsx}\"",
+    "prettier:write": "npm run prettier:base --write \"src/**/*{ts,tsx}\"",
+    "precommit": "npm run prettier:write"
   },
   "keywords": [],
   "author": "",

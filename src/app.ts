@@ -7,7 +7,7 @@ import { readFileSync } from "fs";
 const fr = FaceRecognizer.getInstance();
 
 program
-  .version(JSON.parse(readFileSync("./package.json").toString()).version)
+  .version("1.0.0")
   .command("train <classDirPath> <serializedBiasesPath>")
   .description("Train network")
   .action(async (classDirPath, serializedBiasesPath) => {

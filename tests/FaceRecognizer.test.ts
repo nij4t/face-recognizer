@@ -11,7 +11,9 @@ suite("FaceRecognizer Test Suite", () => {
   });
 
   test("Load models successful", done => {
-    fr.onmodelsready = () => done()
+    fr.onnetworkready = () => done()
   });
 
 });
+
+// TODO: cover FaceRecognizer with tests 

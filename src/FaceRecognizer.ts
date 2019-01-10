@@ -128,3 +128,4 @@ export default class FaceRecognizer {
   }
 }
 // TODO: High Cohesive Refactor 
+// FIXME: Add path resolver 

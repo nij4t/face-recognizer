@@ -2,7 +2,9 @@
   "name": "face-api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "bin": {
+    "face-recognizer-cli": "./build/app.js"
+  },
   "scripts": {
     "build": "tsc",
     "test": "mocha --ui tdd --require ts-node/register tests/**/*.ts",
@@ -19,6 +21,7 @@
     "@types/node": "^10.12.18",
     "canvas": "^2.2.0",
     "chai": "^4.2.0",
+    "commander": "^2.19.0",
     "face-api.js": "^0.17.1",
     "mocha": "^5.2.0"
   },

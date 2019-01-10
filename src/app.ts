@@ -1,21 +1,29 @@
+#!/usr/bin/env node
+import * as program from "commander";
+
 import FaceRecognizer from "./FaceRecognizer";
+import { readFileSync } from "fs";
 
 const fr = FaceRecognizer.getInstance();
-const serializedBiasesPath = "./data/trained/app_biases.json";
-const testImagePath = "./data/test/rock.jpg";
 
-fr.onnetworkready = () => {
-  // fr.train("./data/training/");
-  fr.deserialize(serializedBiasesPath)
-  fr.predict(testImagePath).then(res => console.log(res.label))
-};
+program
+  .version(JSON.parse(readFileSync("./package.json").toString()).version)
+  .command("train <classDirPath> <serializedBiasesPath>")
+  .description("Train network")
+  .action(async (classDirPath, serializedBiasesPath) => {
+    await fr.train(classDirPath);
+    fr.serialize(serializedBiasesPath);
+  });
 
-// fr.onnetworktrained = () => {
-  // fr.predict(testImagePath).then(prediction =>
-//     console.log(prediction.label)
-//   );
-//   fr.serialize(serializedBiasesPath);
-// };
+program
+  .command("predict <serializedBiasesPath> <imageSource>")
+  .description("Recognize face from image")
+  .action(async (serializedBiasesPath, imageSource) => {
+    fr.deserialize(serializedBiasesPath);
+    const prediction = await fr.predict(imageSource);
+    console.log(prediction.label);
+  });
 
+fr.onnetworkready = () => program.parse(process.argv);
 
-// TODO: Build CLI 
+// TODO: Create help screen

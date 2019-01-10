@@ -8,7 +8,7 @@ faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 export default class FaceRecognizer {
   private static instance: FaceRecognizer;
 
-  private labeledFaceDescriptors = [];
+  private labeledFaceDescriptors = new Array<faceapi.LabeledFaceDescriptors>();
   private MODEL_URI = "./models/";
   private DISTANCE_THRESHOLD = 0.6;
 
@@ -32,8 +32,9 @@ export default class FaceRecognizer {
 
   public async train(dir: string) {
     const labels = this.getClassNames(dir);
-    this.labeledFaceDescriptors.concat(
-      await this.getAllLabeledDescriptors(labels, dir)
+    const labeledDescriptions = await this.getAllLabeledDescriptors(labels, dir);
+    this.labeledFaceDescriptors.push(
+      ...labeledDescriptions
     );
     this.onnetworktrained();
   }
@@ -62,7 +63,6 @@ export default class FaceRecognizer {
   }
 
   public async predict(src: string) {
-    // TODO: Implement prediction 
     const faceMatcher = new faceapi.FaceMatcher(
       this.labeledFaceDescriptors,
       this.DISTANCE_THRESHOLD

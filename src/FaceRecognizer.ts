@@ -29,16 +29,20 @@ export default class FaceRecognizer {
     }
     return this.instance;
   }
-
-  public async train(dir: string) {
-    const labels = this.getClassNames(dir);
-    const labeledDescriptions = await this.getAllLabeledDescriptors(labels, dir);
+  /**
+  * @param classPath Specify path for your classes 
+  */
+  public async train(classPath: string) {
+    const labels = this.getClassNames(classPath);
+    const labeledDescriptions = await this.getAllLabeledDescriptors(labels, classPath);
     this.labeledFaceDescriptors.push(
       ...labeledDescriptions
     );
     this.onnetworktrained();
   }
-
+  /**
+   * @param path Path to the object that stores biases for your model
+   */
   public deserialize(path: string) {
     const deserialized = JSON.parse(readFileSync(path).toString()).map(
       fr =>
@@ -51,7 +55,10 @@ export default class FaceRecognizer {
     );
     this.labeledFaceDescriptors = deserialized;
   }
-
+  /**
+   * 
+   * @param path Desired path for saving biases of your model
+   */
   public serialize(path: string) {
     const serializable = this.labeledFaceDescriptors.map(descriptor => ({
       _label: descriptor.label,
@@ -61,7 +68,10 @@ export default class FaceRecognizer {
     }));
     writeFileSync(path, JSON.stringify(serializable));
   }
-
+  /**
+   * 
+   * @param src Image file path to for prediction
+   */
   public async predict(src: string) {
     const faceMatcher = new faceapi.FaceMatcher(
       this.labeledFaceDescriptors,

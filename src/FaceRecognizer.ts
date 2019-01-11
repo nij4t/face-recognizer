@@ -1,15 +1,18 @@
 import * as faceapi from "face-api.js";
 import { Canvas, Image, ImageData } from "canvas";
 import { readdirSync, writeFileSync, readFileSync } from "fs";
+import { resolve } from "path";
 
 require("@tensorflow/tfjs-node");
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
+
+process.env['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 export default class FaceRecognizer {
   private static instance: FaceRecognizer;
 
   private labeledFaceDescriptors = new Array<faceapi.LabeledFaceDescriptors>();
-  private MODEL_URI = "./models/";
+  private MODEL_URI = resolve(__dirname, "../models");
   private DISTANCE_THRESHOLD = 0.6;
 
   public onnetworkready: Function = () => {};
@@ -30,21 +33,22 @@ export default class FaceRecognizer {
     return this.instance;
   }
   /**
-  * @param classPath Specify path for your classes 
-  */
+   * @param classPath Specify path for your classes
+   */
   public async train(classPath: string) {
     const labels = this.getClassNames(classPath);
-    const labeledDescriptions = await this.getAllLabeledDescriptors(labels, classPath);
-    this.labeledFaceDescriptors.push(
-      ...labeledDescriptions
+    const labeledDescriptions = await this.getAllLabeledDescriptors(
+      labels,
+      classPath
     );
+    this.labeledFaceDescriptors.push(...labeledDescriptions);
     this.onnetworktrained();
   }
   /**
    * @param path Path to the object that stores biases for your model
    */
   public deserialize(path: string) {
-    const deserialized = JSON.parse(readFileSync(path).toString()).map(
+    const deserialized = JSON.parse(readFileSync(resolve(path)).toString()).map(
       fr =>
         new faceapi.LabeledFaceDescriptors(
           fr._label,
@@ -56,7 +60,7 @@ export default class FaceRecognizer {
     this.labeledFaceDescriptors = deserialized;
   }
   /**
-   * 
+   *
    * @param path Desired path for saving biases of your model
    */
   public serialize(path: string) {
@@ -66,10 +70,10 @@ export default class FaceRecognizer {
         Object.values(val)
       )
     }));
-    writeFileSync(path, JSON.stringify(serializable));
+    writeFileSync(resolve(path), JSON.stringify(serializable));
   }
   /**
-   * 
+   *
    * @param src Image file path to for prediction
    */
   public async predict(src: string) {
@@ -84,12 +88,12 @@ export default class FaceRecognizer {
 
   private loadImage(src): HTMLImageElement {
     const image = new Image();
-    image.src = src;
+    image.src = resolve(src);
     return image;
   }
 
   private getClassNames(dir: string): string[] {
-    return readdirSync(dir);
+    return readdirSync(resolve(dir));
   }
 
   private async getFaceDescriptorsAsync(image: HTMLImageElement) {
@@ -113,7 +117,7 @@ export default class FaceRecognizer {
   }
 
   private async getImagesAsync(label, origin) {
-    const src = origin + label;
+    const src = resolve(origin, label);
     return readdirSync(src).map(file => this.loadImage(src + "/" + file));
   }
 
@@ -127,5 +131,4 @@ export default class FaceRecognizer {
     );
   }
 }
-// TODO: High Cohesive Refactor 
-// FIXME: Add path resolver 
+// TODO: High Cohesive Refactor

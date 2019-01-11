@@ -39,10 +39,9 @@ var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var program = require("commander");
 var FaceRecognizer_1 = require("./FaceRecognizer");
-var fs_1 = require("fs");
 var fr = FaceRecognizer_1.default.getInstance();
 program
-    .version('1.0.0')
+    .version("1.0.0")
     .command("train <classDirPath> <serializedBiasesPath>")
     .description("Train network")
     .action(function (classDirPath, serializedBiasesPath) { return __awaiter(_this, void 0, void 0, function () {

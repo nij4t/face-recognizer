@@ -38,13 +38,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var faceapi = require("face-api.js");
 var canvas_1 = require("canvas");
 var fs_1 = require("fs");
+var path_1 = require("path");
 require("@tensorflow/tfjs-node");
 faceapi.env.monkeyPatch({ Canvas: canvas_1.Canvas, Image: canvas_1.Image, ImageData: canvas_1.ImageData });
+process.env['TF_CPP_MIN_LOG_LEVEL'] = '2';
 var FaceRecognizer = /** @class */ (function () {
     function FaceRecognizer() {
         var _this = this;
         this.labeledFaceDescriptors = new Array();
-        this.MODEL_URI = "./models/";
+        this.MODEL_URI = path_1.resolve(__dirname, "../models");
         this.DISTANCE_THRESHOLD = 0.6;
         this.onnetworkready = function () { };
         this.onnetworktrained = function () { };
@@ -61,8 +63,8 @@ var FaceRecognizer = /** @class */ (function () {
         return this.instance;
     };
     /**
-    * @param classPath Specify path for your classes
-    */
+     * @param classPath Specify path for your classes
+     */
     FaceRecognizer.prototype.train = function (classPath) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, labels, labeledDescriptions;
@@ -84,7 +86,7 @@ var FaceRecognizer = /** @class */ (function () {
      * @param path Path to the object that stores biases for your model
      */
     FaceRecognizer.prototype.deserialize = function (path) {
-        var deserialized = JSON.parse(fs_1.readFileSync(path).toString()).map(function (fr) {
+        var deserialized = JSON.parse(fs_1.readFileSync(path_1.resolve(path)).toString()).map(function (fr) {
             return new faceapi.LabeledFaceDescriptors(fr._label, Object.values(fr._descriptors).map(function (val) { return new Float32Array(Object.values(val)); }));
         });
         this.labeledFaceDescriptors = deserialized;
@@ -100,7 +102,7 @@ var FaceRecognizer = /** @class */ (function () {
                 return Object.values(val);
             })
         }); });
-        fs_1.writeFileSync(path, JSON.stringify(serializable));
+        fs_1.writeFileSync(path_1.resolve(path), JSON.stringify(serializable));
     };
     /**
      *
@@ -122,11 +124,11 @@ var FaceRecognizer = /** @class */ (function () {
     };
     FaceRecognizer.prototype.loadImage = function (src) {
         var image = new canvas_1.Image();
-        image.src = src;
+        image.src = path_1.resolve(src);
         return image;
     };
     FaceRecognizer.prototype.getClassNames = function (dir) {
-        return fs_1.readdirSync(dir);
+        return fs_1.readdirSync(path_1.resolve(dir));
     };
     FaceRecognizer.prototype.getFaceDescriptorsAsync = function (image) {
         return __awaiter(this, void 0, void 0, function () {
@@ -158,7 +160,7 @@ var FaceRecognizer = /** @class */ (function () {
             var src;
             var _this = this;
             return __generator(this, function (_a) {
-                src = origin + label;
+                src = path_1.resolve(origin, label);
                 return [2 /*return*/, fs_1.readdirSync(src).map(function (file) { return _this.loadImage(src + "/" + file); })];
             });
         });
@@ -183,5 +185,5 @@ var FaceRecognizer = /** @class */ (function () {
     return FaceRecognizer;
 }());
 exports.default = FaceRecognizer;
-// TODO: High Cohesive Refactor 
+// TODO: High Cohesive Refactor
 //# sourceMappingURL=FaceRecognizer.js.map

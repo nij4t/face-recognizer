@@ -2,6 +2,7 @@ import * as faceapi from "face-api.js";
 import { Canvas, Image, ImageData } from "canvas";
 import { readdirSync, writeFileSync, readFileSync } from "fs";
 import { resolve } from "path";
+import { DescriptorIOHander } from "./DescriptorIOHander";
 
 require("@tensorflow/tfjs-node");
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
@@ -14,7 +15,7 @@ export default class FaceRecognizer {
   private labeledFaceDescriptors = new Array<faceapi.LabeledFaceDescriptors>();
   private MODEL_URI = resolve(__dirname, "../models");
   private DISTANCE_THRESHOLD = 0.6;
-
+  private ioHandler = new DescriptorIOHander(this.labeledFaceDescriptors);
   public onnetworkready: Function = () => {};
   public onnetworktrained: Function = () => {};
 
@@ -47,30 +48,15 @@ export default class FaceRecognizer {
   /**
    * @param path Path to the object that stores biases for your model
    */
-  public deserialize(path: string) {
-    const deserialized = JSON.parse(readFileSync(resolve(path)).toString()).map(
-      fr =>
-        new faceapi.LabeledFaceDescriptors(
-          fr._label,
-          Object.values(fr._descriptors).map(
-            val => new Float32Array(Object.values(val))
-          )
-        )
-    );
-    this.labeledFaceDescriptors = deserialized;
+  public deserialize(path: string): void {
+    this.labeledFaceDescriptors = this.ioHandler.deserialize(path);
   }
   /**
    *
    * @param path Desired path for saving biases of your model
    */
   public serialize(path: string) {
-    const serializable = this.labeledFaceDescriptors.map(descriptor => ({
-      _label: descriptor.label,
-      _descriptors: Object.values(descriptor.descriptors).map(val =>
-        Object.values(val)
-      )
-    }));
-    writeFileSync(resolve(path), JSON.stringify(serializable));
+    this.ioHandler.serialize(path)
   }
   /**
    *

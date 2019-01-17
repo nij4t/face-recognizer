@@ -1,6 +1,6 @@
 import * as faceapi from "face-api.js";
 import { Canvas, Image, ImageData } from "canvas";
-import { readdirSync, writeFileSync, readFileSync } from "fs";
+import { readdirSync } from "fs";
 import { resolve } from "path";
 import { DescriptorIOHander } from "./DescriptorIOHander";
 
@@ -16,6 +16,7 @@ export default class FaceRecognizer {
   private MODEL_URI = resolve(__dirname, "../models");
   private DISTANCE_THRESHOLD = 0.6;
   private ioHandler = new DescriptorIOHander(this.labeledFaceDescriptors);
+
   public onnetworkready: Function = () => {};
   public onnetworktrained: Function = () => {};
 
@@ -117,4 +118,3 @@ export default class FaceRecognizer {
     );
   }
 }
-// TODO: High Cohesive Refactor

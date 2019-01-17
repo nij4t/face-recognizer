@@ -2,7 +2,6 @@
 import * as program from "commander";
 
 import FaceRecognizer from "./FaceRecognizer";
-import { readFileSync } from "fs";
 
 const fr = FaceRecognizer.getInstance();
 
@@ -26,4 +25,5 @@ program
 
 fr.onnetworkready = () => program.parse(process.argv);
 
-// TODO: Create help screen
+// TODO: Switch to stateful CLI 
+// TODO: Create help screen 

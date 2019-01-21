@@ -47,7 +47,8 @@ export default class FaceRecognizer implements NetworkStatus {
   }
 
   public async train(dir: string) {
-    const imageSets = this.classifier.getImageSets(dir);
+    const imageSets = 
+    this.classifier.getImageSets(dir);
     const descriptors = await this.descriptorGenerator.getAllLabeledDescriptors(
       imageSets
     );

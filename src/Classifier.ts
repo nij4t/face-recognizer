@@ -15,10 +15,10 @@ export class Classifier implements ISerializable, IDeserializable<ImageSet[]> {
   
   public getImageSets(dir: string): ImageSet[] {
     return this.getClassNames(dir).map(className => {
-      return {
+      return ({
         name: className,
-        images: this.getImages(resolve(dir, className))
-      };
+        images: this.getImages(resolve(dir, className)).map(img => resolve(dir, className, img))
+      } as ImageSet);
     });
   }
 

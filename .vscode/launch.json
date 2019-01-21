@@ -8,7 +8,7 @@
             "name": "Current TS File",
             "type": "node",
             "request": "launch",
-            "args": ["./src/app.ts"],
+            "args": ["./src/app.ts", "train", "../face-recognition-data/training/", "../face-recoginiton-data/trained/sample_debug.json"],
             "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
             "sourceMaps": true,
             "cwd": "${workspaceRoot}",

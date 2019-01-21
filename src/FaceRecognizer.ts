@@ -1,31 +1,30 @@
-import * as faceapi from "face-api.js";
-import { Canvas, Image, ImageData } from "canvas";
-import { readdirSync } from "fs";
-import { resolve } from "path";
-import { DescriptorIOHander } from "./DescriptorIOHander";
+import { Model } from "./Model";
+import { Classifier } from "./Classifier";
+import { DescriptorsGenerator } from "./DescriptorGenerator";
+import { Predictor } from "./Predictor";
+import { ImageLoader } from "./ImageLoader";
+import { NetworkStatus } from "./NetworkStatus";
 
-require("@tensorflow/tfjs-node");
-faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
+process.env["TF_CPP_MIN_LOG_LEVEL"] = "2";
 
-process.env['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-export default class FaceRecognizer {
+export default class FaceRecognizer implements NetworkStatus {
   private static instance: FaceRecognizer;
 
-  private labeledFaceDescriptors = new Array<faceapi.LabeledFaceDescriptors>();
-  private MODEL_URI = resolve(__dirname, "../models");
-  private DISTANCE_THRESHOLD = 0.6;
-  private ioHandler = new DescriptorIOHander(this.labeledFaceDescriptors);
+  private model: Model;
+  private classifier: Classifier;
+  private descriptorGenerator: DescriptorsGenerator;
+  private predictor: Predictor;
+  private imageLoader: ImageLoader;
 
-  public onnetworkready: Function = () => {};
-  public onnetworktrained: Function = () => {};
+  public networkReady = () => {}
 
-  private constructor() {
-    Promise.all([
-      faceapi.nets.ssdMobilenetv1.loadFromDisk(this.MODEL_URI),
-      faceapi.nets.faceLandmark68Net.loadFromDisk(this.MODEL_URI),
-      faceapi.nets.faceRecognitionNet.loadFromDisk(this.MODEL_URI)
-    ]).then(() => this.onnetworkready());
+  constructor() {
+    this.model = new Model();
+    this.classifier = new Classifier();
+    this.descriptorGenerator = DescriptorsGenerator.getInstance();
+    this.imageLoader = new ImageLoader();
+
+    // this.descriptorGenerator.setNetworkReadyHandler(this.networkReady);
   }
 
   static getInstance(): FaceRecognizer {
@@ -34,87 +33,34 @@ export default class FaceRecognizer {
     }
     return this.instance;
   }
-  /**
-   * @param classPath Specify path for your classes
-   */
-  public async train(classPath: string) {
-    const labels = this.getClassNames(classPath);
-    const labeledDescriptions = await this.getAllLabeledDescriptors(
-      labels,
-      classPath
+
+  public ready(cb: Function) {
+    this.descriptorGenerator.loadNetworks().then(() => cb.call(this)) 
+  }
+
+  public load(src: string) {
+    this.model.deserialize(src);
+  }
+
+  public save(path: string) {
+    this.model.serialize(path);
+  }
+
+  public async train(dir: string) {
+    const imageSets = this.classifier.getImageSets(dir);
+    const descriptors = await this.descriptorGenerator.getAllLabeledDescriptors(
+      imageSets
     );
-    this.labeledFaceDescriptors.push(...labeledDescriptions);
-    this.onnetworktrained();
+    this.model.setDescriptors(descriptors);
   }
-  /**
-   * @param path Path to the object that stores biases for your model
-   */
-  public deserialize(path: string): void {
-    this.labeledFaceDescriptors = this.ioHandler.deserialize(path);
-  }
-  /**
-   *
-   * @param path Desired path for saving biases of your model
-   */
-  public serialize(path: string) {
-    this.ioHandler.serialize(path)
-  }
-  /**
-   *
-   * @param src Image file path to for prediction
-   */
+
   public async predict(src: string) {
-    const faceMatcher = new faceapi.FaceMatcher(
-      this.labeledFaceDescriptors,
-      this.DISTANCE_THRESHOLD
-    );
-    return faceMatcher.findBestMatch(
-      await this.getFaceDescriptorsAsync(this.loadImage(src))
-    );
-  }
-
-  private loadImage(src): HTMLImageElement {
-    const image = new Image();
-    image.src = resolve(src);
-    return image;
-  }
-
-  private getClassNames(dir: string): string[] {
-    return readdirSync(resolve(dir));
-  }
-
-  private async getFaceDescriptorsAsync(image: HTMLImageElement) {
-    return (await faceapi
-      .detectSingleFace(image)
-      .withFaceLandmarks()
-      .withFaceDescriptor()).descriptor;
-  }
-
-  private getDescriptorSetAsync(images: HTMLImageElement[]) {
-    return Promise.all(
-      images.map(async image => await this.getFaceDescriptorsAsync(image))
+    this.predictor = new Predictor(this.model);
+    return this.predictor.predict(
+      await this.descriptorGenerator.getFaceDescriptorsAsync(
+        this.imageLoader.load(src)
+      )
     );
   }
 
-  private getLabeledDescriptors(
-    label: string,
-    descriptors: Float32Array[]
-  ): faceapi.LabeledFaceDescriptors {
-    return new faceapi.LabeledFaceDescriptors(label, descriptors);
-  }
-
-  private async getImagesAsync(label, origin) {
-    const src = resolve(origin, label);
-    return readdirSync(src).map(file => this.loadImage(src + "/" + file));
-  }
-
-  private getAllLabeledDescriptors(labels: string[], origin: string) {
-    return Promise.all(
-      labels.map(async label => {
-        const images = await this.getImagesAsync(label, origin);
-        const descriptors = await this.getDescriptorSetAsync(images);
-        return this.getLabeledDescriptors(label, descriptors);
-      })
-    );
-  }
 }

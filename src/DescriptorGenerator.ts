@@ -6,7 +6,7 @@ import { ImageLoader } from "./ImageLoader";
 // import { NetworkStatus } from "./NetworkStatus";
 
 require("@tensorflow/tfjs-node");
-faceapi.env.monkeyPatch({ Image });
+faceapi.env.monkeyPatch({ Image, ImageData, Canvas });
 
 export class DescriptorsGenerator {
   private MODEL_URI = resolve(__dirname, "../models");

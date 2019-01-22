@@ -3,11 +3,10 @@ import { Classifier } from "./Classifier";
 import { DescriptorsGenerator } from "./DescriptorGenerator";
 import { Predictor } from "./Predictor";
 import { ImageLoader } from "./ImageLoader";
-import { NetworkStatus } from "./NetworkStatus";
 
 process.env["TF_CPP_MIN_LOG_LEVEL"] = "2";
 
-export default class FaceRecognizer implements NetworkStatus {
+export default class FaceRecognizer {
   private static instance: FaceRecognizer;
 
   private model: Model;
@@ -16,15 +15,12 @@ export default class FaceRecognizer implements NetworkStatus {
   private predictor: Predictor;
   private imageLoader: ImageLoader;
 
-  public networkReady = () => {}
 
   constructor() {
     this.model = new Model();
     this.classifier = new Classifier();
     this.descriptorGenerator = DescriptorsGenerator.getInstance();
     this.imageLoader = new ImageLoader();
-
-    // this.descriptorGenerator.setNetworkReadyHandler(this.networkReady);
   }
 
   static getInstance(): FaceRecognizer {

@@ -2,21 +2,7 @@ import * as cfonts from "cfonts";
 import FaceRecognizer from "./FaceRecognizer";
 import { existsSync } from "fs";
 
-console.clear();
-
-cfonts.say("Face|Recognizer", {
-  font: "block", // define the font face
-  align: "center", // define text alignment
-  colors: ["green", "black"], // define all colors
-  background: "transparent", // define the background color, you can also use `backgroundColor` here as key
-  letterSpacing: 1, // define letter spacing
-  lineHeight: 1, // define the line height
-  space: true, // define if the output text should have empty lines on top and on the bottom
-  maxLength: "80" // define how many character can be on one line
-});
-
-// TODO: Add help screen 
-
+showBanner();
 placeholder();
 
 const modes = {
@@ -56,7 +42,8 @@ process.stdin.on("data", async chunk => {
           console.log("exiting...");
           process.exit(0);
         default:
-          console.log("Invalid command");
+          // console.log("Invalid command");
+          showBanner();
           placeholder();
           break;
       }
@@ -111,6 +98,32 @@ process.stdin.on("data", async chunk => {
       break;
   }
 });
+
+function showBanner() {
+  console.clear();
+
+  cfonts.say("Face|Recognizer", {
+    font: "block", // define the font face
+    align: "left", // define text alignment
+    colors: ["green", "black"], // define all colors
+    background: "transparent", // define the background color, you can also use `backgroundColor` here as key
+    letterSpacing: 1, // define letter spacing
+    lineHeight: 1, // define the line height
+    space: true, // define if the output text should have empty lines on top and on the bottom
+    maxLength: "80" // define how many character can be on one line
+  });
+
+  console.log(`
+    Command       Description
+    -------       -----------
+    ?             Help menu
+    train         Train network 
+    predict       Recognize face
+    save          Save model to a file
+    load          Load model from a file
+    exit          Close the application
+`);
+}
 
 function placeholder() {
   process.stdout.write("\x1b[32m \u25A0\u25B6 face-recognizer\u203A \x1b[0m");

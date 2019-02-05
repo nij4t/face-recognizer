@@ -37,6 +37,8 @@ export class Model
   }
 
   setDescriptors(descriptors: LabeledFaceDescriptors[]): void {
-    this.descriptors = descriptors;
+    this.descriptors = descriptors.map(
+      descriptor => new LabeledFaceDescriptors(descriptor.label, descriptor.descriptors)
+    )
   }
 }

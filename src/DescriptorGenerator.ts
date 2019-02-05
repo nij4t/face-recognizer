@@ -1,16 +1,18 @@
-import * as faceapi from "face-api.js";
+import { nets, detectSingleFace, WithFaceLandmarks, WithFaceDescriptor, env, LabeledFaceDescriptors } from "face-api.js";
 import { Image, ImageData, Canvas } from "canvas";
 import { resolve } from "path";
 import { ImageSet } from "./ImageSet";
 import { ImageLoader } from "./ImageLoader";
 
 require("@tensorflow/tfjs-node");
-faceapi.env.monkeyPatch({ Image, ImageData, Canvas });
+env.monkeyPatch({ Image, ImageData, Canvas });
 
 export class DescriptorsGenerator {
   private MODEL_URI = resolve(__dirname, "../models");
   private networkready = false;
-  private static instance;
+  private static instance: DescriptorsGenerator;
+
+  private constructor() {}
 
   public static getInstance() {
     if (!this.instance) {
@@ -31,18 +33,18 @@ export class DescriptorsGenerator {
   }
 
   public async getFaceDescriptorsAsync(image: HTMLImageElement) {
-    return (await faceapi
-      .detectSingleFace(image)
+    return (await 
+      detectSingleFace(image)
       .withFaceLandmarks()
       .withFaceDescriptor()).descriptor;
   }
 
- public loadNetworks() {
+  public loadNetworks() {
     return Promise.all([
-      faceapi.nets.ssdMobilenetv1.loadFromDisk(this.MODEL_URI),
-      faceapi.nets.faceLandmark68Net.loadFromDisk(this.MODEL_URI),
-      faceapi.nets.faceRecognitionNet.loadFromDisk(this.MODEL_URI)
-    ]); 
+      nets.ssdMobilenetv1.loadFromDisk(this.MODEL_URI),
+      nets.faceLandmark68Net.loadFromDisk(this.MODEL_URI),
+      nets.faceRecognitionNet.loadFromDisk(this.MODEL_URI)
+    ]);
   }
 
   private getDescriptorSetAsync(images: HTMLImageElement[]) {
@@ -54,8 +56,7 @@ export class DescriptorsGenerator {
   private getLabeledDescriptors(
     label: string,
     descriptors: Float32Array[]
-  ): faceapi.LabeledFaceDescriptors {
-    return new faceapi.LabeledFaceDescriptors(label, descriptors);
+  ): LabeledFaceDescriptors {
+    return new LabeledFaceDescriptors(label, descriptors);
   }
-
 }
